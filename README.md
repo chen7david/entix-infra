@@ -66,6 +66,40 @@ cdk diff
 
 All CDK commands will use the AWS credentials you configured above.
 
+## CDK Project Usage
+
+This project uses the AWS Cloud Development Kit (CDK) with TypeScript to define and manage infrastructure as code. The CDK app is structured to support multiple environments (production, staging, testing) within a single AWS account, using environment-prefixed stack and resource names (e.g., `production-entix-infra`).
+
+### Project Structure
+
+- `bin/entix-infra.ts`: Entry point for the CDK app, instantiates a stack for each environment.
+- `lib/entix-infra-stack.ts`: Main stack definition, parameterized by environment.
+- `cdk.json`: CDK configuration.
+- `.github/workflows/deploy.yml`: GitHub Actions workflow for CI/CD deployment.
+
+### Environment Naming Convention
+
+All stacks and resources are prefixed with the environment name (e.g., `production-entix-infra`, `staging-entix-infra`, `testing-entix-infra`). This makes it easy to distinguish resources by environment and simplifies migration to a multi-account setup in the future.
+
+### Useful Commands
+
+- `npm run build` – Compile TypeScript to JavaScript
+- `npm run watch` – Watch for changes and compile
+- `npm run test` – Run Jest unit tests
+- `npx cdk deploy <env>-entix-infra` – Deploy the stack for a specific environment (e.g., `production-entix-infra`)
+- `npx cdk diff <env>-entix-infra` – Compare deployed stack with current state
+- `npx cdk synth <env>-entix-infra` – Emit the synthesized CloudFormation template for a specific environment
+
+#### Example:
+
+```sh
+npx cdk deploy production-entix-infra
+npx cdk diff staging-entix-infra
+npx cdk synth testing-entix-infra
+```
+
+> **Tip:** The GitHub Actions workflow will automatically deploy the correct stack based on the branch name (`main` → `production-entix-infra`, `staging` → `staging-entix-infra`, `testing` → `testing-entix-infra`).
+
 ## Notes
 
 - This setup supports both ARM64 and x86-64 platforms natively.
