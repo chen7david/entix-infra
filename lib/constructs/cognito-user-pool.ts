@@ -3,16 +3,16 @@ import { Construct } from "constructs";
 import { aws_cognito as cognito } from "aws-cdk-lib";
 
 /**
- * Creates a Cognito User Pool with environment-specific configuration.
+ * Creates a Cognito User Pool and App Client with environment-specific configuration.
  *
  * @param scope - The construct scope.
  * @param envName - The environment name (e.g., production, staging, test).
- * @returns The created Cognito User Pool.
+ * @returns The created Cognito User Pool and App Client.
  */
 export const createCognitoUserPool = (
   scope: Construct,
   envName: string
-): cognito.UserPool => {
+): { userPool: cognito.UserPool; userPoolClient: cognito.UserPoolClient } => {
   const isTestEnv = envName === "test";
   const userPool = new cognito.UserPool(scope, `${envName}-user-pool`, {
     userPoolName: `${envName}-entix-user-pool`,
@@ -47,6 +47,25 @@ export const createCognitoUserPool = (
       : undefined,
   });
 
+  // App client for basic auth (username & password)
+  const userPoolClient = new cognito.UserPoolClient(
+    scope,
+    `${envName}-user-pool-client`,
+    {
+      userPool,
+      generateSecret: false,
+      authFlows: {
+        userPassword: true,
+        userSrp: true,
+        adminUserPassword: true,
+      },
+      supportedIdentityProviders: [
+        cognito.UserPoolClientIdentityProvider.COGNITO,
+        // cognito.UserPoolClientIdentityProvider.GOOGLE, // Uncomment if Google is enabled
+      ],
+    }
+  );
+
   // Enable Google as an identity provider (requires client ID/secret)
   // new cognito.UserPoolIdentityProviderGoogle(scope, `${envName}-google-idp`, {
   //   clientId: process.env.GOOGLE_CLIENT_ID || "GOOGLE_CLIENT_ID_PLACEHOLDER",
@@ -62,5 +81,5 @@ export const createCognitoUserPool = (
   //   },
   // });
 
-  return userPool;
+  return { userPool, userPoolClient };
 };

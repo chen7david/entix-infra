@@ -8,9 +8,12 @@ import { createCognitoUserPool } from "../lib/constructs/cognito-user-pool";
  */
 class TestStack extends cdk.Stack {
   public readonly userPool: cdk.aws_cognito.UserPool;
+  public readonly userPoolClient: cdk.aws_cognito.UserPoolClient;
   constructor(scope: Construct, id: string, envName: string) {
     super(scope, id);
-    this.userPool = createCognitoUserPool(this, envName);
+    const { userPool, userPoolClient } = createCognitoUserPool(this, envName);
+    this.userPool = userPool;
+    this.userPoolClient = userPoolClient;
   }
 }
 
@@ -37,6 +40,22 @@ describe("createCognitoUserPool", () => {
     template.hasResourceProperties("AWS::Cognito::UserPool", {
       UserPoolName: "test-entix-user-pool",
       AutoVerifiedAttributes: [],
+    });
+  });
+
+  it("creates a Cognito User Pool Client with correct config for basic auth", () => {
+    const app = new cdk.App();
+    const stack = new TestStack(app, "TestStackClient", "production");
+    const template = Template.fromStack(stack);
+    template.hasResourceProperties("AWS::Cognito::UserPoolClient", {
+      GenerateSecret: false,
+      ExplicitAuthFlows: [
+        "ALLOW_USER_PASSWORD_AUTH",
+        "ALLOW_ADMIN_USER_PASSWORD_AUTH",
+        "ALLOW_USER_SRP_AUTH",
+        "ALLOW_REFRESH_TOKEN_AUTH",
+      ],
+      SupportedIdentityProviders: ["COGNITO"],
     });
   });
 });

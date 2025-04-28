@@ -26,6 +26,9 @@ export class EntixInfraStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: EntixInfraStackProps) {
     super(scope, id, props);
 
-    const userPool = createCognitoUserPool(this, props.envName);
+    const { userPool, userPoolClient } = createCognitoUserPool(
+      this,
+      props.envName
+    );
   }
 }
