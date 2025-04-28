@@ -1,20 +1,27 @@
 #!/usr/bin/env node
-import * as cdk from 'aws-cdk-lib';
-import { EntixInfraStack } from '../lib/entix-infra-stack';
+import * as cdk from "aws-cdk-lib";
+import {
+  EntixInfraStack,
+  EntixInfraStackProps,
+} from "../lib/entix-infra-stack";
+
+/**
+ * Supported deployment environments.
+ */
+const environments = ["production", "staging", "test"] as const;
+type Environment = (typeof environments)[number];
 
 const app = new cdk.App();
-new EntixInfraStack(app, 'EntixInfraStack', {
-  /* If you don't specify 'env', this stack will be environment-agnostic.
-   * Account/Region-dependent features and context lookups will not work,
-   * but a single synthesized template can be deployed anywhere. */
 
-  /* Uncomment the next line to specialize this stack for the AWS Account
-   * and Region that are implied by the current CLI configuration. */
-  // env: { account: process.env.CDK_DEFAULT_ACCOUNT, region: process.env.CDK_DEFAULT_REGION },
-
-  /* Uncomment the next line if you know exactly what Account and Region you
-   * want to deploy the stack to. */
-  // env: { account: '123456789012', region: 'us-east-1' },
-
-  /* For more information, see https://docs.aws.amazon.com/cdk/latest/guide/environments.html */
+environments.forEach((env) => {
+  const stackProps: EntixInfraStackProps = {
+    /*
+     * Pass the environment name for resource naming and tagging.
+     * You can add AWS account/region here if needed in the future.
+     */
+    envName: env,
+    description: `Entix Infra stack for ${env}`,
+    tags: { Environment: env },
+  };
+  new EntixInfraStack(app, `${env}-entix-infra`, stackProps);
 });

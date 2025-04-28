@@ -100,6 +100,47 @@ npx cdk synth testing-entix-infra
 
 > **Tip:** The GitHub Actions workflow will automatically deploy the correct stack based on the branch name (`main` → `production-entix-infra`, `staging` → `staging-entix-infra`, `testing` → `testing-entix-infra`).
 
+## CI/CD with GitHub Actions
+
+This project uses GitHub Actions for automated deployment of your AWS CDK stacks to different environments. The workflow is defined in `.github/workflows/deploy.yml`.
+
+### Deployment Triggers and Environment Mapping
+
+- **Branches:** Deployments are triggered on push to the following branches:
+  - `main` → **production** environment (stack: `production-entix-infra`)
+  - `staging` → **staging** environment (stack: `staging-entix-infra`)
+  - `test` → **test** environment (stack: `test-entix-infra`)
+- The workflow automatically maps the `main` branch to the `production` environment and stack prefix. Other branches use their branch name as the environment and stack prefix.
+- The workflow will bootstrap the CDK app if needed (idempotent, safe to run multiple times).
+
+### GitHub Environments and Secrets
+
+For secure deployments, you must create the following GitHub Environments in your repository settings:
+
+- `production`
+- `staging`
+- `test`
+
+For each environment, add these secrets:
+
+- `AWS_ACCESS_KEY_ID`
+- `AWS_SECRET_ACCESS_KEY`
+- `AWS_REGION`
+
+### Recommended Development Workflow
+
+1. **Feature Development:**
+   - Create a feature branch from `main` (or `staging`/`test` as appropriate).
+   - Develop and test locally using the dev container and CDK commands.
+2. **Pull Request:**
+   - Open a PR to merge your feature branch into `main`, `staging`, or `test`.
+   - Ensure all checks pass and request review.
+3. **Merge:**
+   - Once approved, merge the PR. This triggers the GitHub Actions workflow to deploy the stack for the target environment.
+   - For `main`, the stack `production-entix-infra` is deployed. For `staging` or `test`, the corresponding stack is deployed.
+
+> **Tip:** Use branch protection rules to require PR review and status checks before merging to `main`, `staging`, or `test` for safer deployments.
+
 ## Notes
 
 - This setup supports both ARM64 and x86-64 platforms natively.
