@@ -147,6 +147,48 @@ For each environment, add these secrets:
 - All tools are installed at build time for fast container startup.
 - For any additional tools, update the `Dockerfile` and rebuild the container.
 
+## Cognito User Pool Authentication
+
+This project provisions an [Amazon Cognito User Pool](https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-identity-pools.html) for authentication, with the following features:
+
+- **Username and password authentication** (usernames are unique)
+- **Duplicate emails allowed** (email is not used as a sign-in alias)
+- **Account email verification required** (except for the `test` environment, where accounts are active immediately)
+- **Password policy:** Minimum 8 characters
+- **Self sign-up enabled**
+- **Account recovery via email only**
+- **Google login (optional, see below)**
+
+### Environment-specific behavior
+
+- In `production` and `staging`, users must verify their email before the account is active.
+- In `test`, accounts are active as soon as they are created (no email verification required).
+
+### Google Login (Optional)
+
+To enable Google login as a federated identity provider:
+
+1. Register your app in the [Google Developer Console](https://console.developers.google.com/) and obtain a Client ID and Client Secret.
+2. Uncomment and configure the `UserPoolIdentityProviderGoogle` block in `lib/entix-infra-stack.ts` with your credentials.
+3. Deploy the stack.
+
+> **Note:** Additional configuration in the AWS Console may be required to finalize the Google identity provider setup.
+
+### Customization
+
+- You can further customize the user pool by editing the `createCognitoUserPool` function in `lib/cognito-user-pool.ts`.
+
+#### Google Auth Environment Variables
+
+To enable Google login, set the following environment variables before deploying:
+
+```sh
+export GOOGLE_CLIENT_ID=your-google-client-id
+export GOOGLE_CLIENT_SECRET=your-google-client-secret
+```
+
+These will be used by the CDK deployment to configure the Google identity provider in Cognito.
+
 ---
 
 For more information, see the [AWS CDK Documentation](https://docs.aws.amazon.com/cdk/latest/guide/home.html) and [AWS CLI Documentation](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-welcome.html).

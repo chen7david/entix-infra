@@ -1,5 +1,6 @@
 import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
+import { createCognitoUserPool } from "./constructs/cognito-user-pool";
 // import * as sqs from 'aws-cdk-lib/aws-sqs';
 
 /**
@@ -25,11 +26,6 @@ export class EntixInfraStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: EntixInfraStackProps) {
     super(scope, id, props);
 
-    // The code that defines your stack goes here
-
-    // example resource
-    // const queue = new sqs.Queue(this, 'EntixInfraQueue', {
-    //   visibilityTimeout: cdk.Duration.seconds(300)
-    // });
+    const userPool = createCognitoUserPool(this, props.envName);
   }
 }
