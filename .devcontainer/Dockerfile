@@ -1,10 +1,12 @@
 FROM mcr.microsoft.com/devcontainers/javascript-node:1-22-bookworm
 
-# Install AWS CLI v2
+# Install AWS CLI v2 (auto-detects architecture for ARM64 and x86-64)
 # See: https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html
 RUN apt-get update && \
     apt-get install -y unzip curl groff less && \
-    curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/awscliv2.zip" && \
+    ARCH=$(uname -m) && \
+    if [ "$ARCH" = "x86_64" ]; then ARCH_NAME="x86_64"; elif [ "$ARCH" = "aarch64" ]; then ARCH_NAME="aarch64"; else echo "Unsupported architecture: $ARCH" && exit 1; fi && \
+    curl "https://awscli.amazonaws.com/awscli-exe-linux-$ARCH_NAME.zip" -o "/tmp/awscliv2.zip" && \
     unzip /tmp/awscliv2.zip -d /tmp && \
     /tmp/aws/install && \
     rm -rf /tmp/aws /tmp/awscliv2.zip && \
