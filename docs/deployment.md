@@ -38,6 +38,15 @@ The application supports the following environments:
 
 Each environment's infrastructure is completely isolated from others. Resources are prefixed with the environment name to prevent naming conflicts. When deploying to a specific branch, only the corresponding environment's resources are affected.
 
+### Cognito Admin IAM Users
+
+For each environment, an IAM user is automatically created to allow backend services to perform administrative actions on the Cognito User Pool for that specific environment. This is crucial for tasks such as user management (creating, deleting, updating users), group management, and other administrative operations via the AWS SDK.
+
+- **Naming Convention**: The IAM users follow the naming pattern: `<environment_name>-cognito-admin-backend` (e.g., `staging-cognito-admin-backend`).
+- **Permissions**: Each user is granted a specific IAM policy that restricts its Cognito administrative actions _only_ to the User Pool of its respective environment. This ensures strict permission boundaries between environments.
+- **Access Keys**: To use these IAM users with your backend services, you will need to manually generate AWS access keys (Access Key ID and Secret Access Key) for each user through the AWS Management Console after they have been created by the CDK deployment.
+- **CDK Output**: The CDK stack will output the name of the created IAM user for each environment, which you can find in the CloudFormation stack outputs.
+
 ## Development Workflow
 
 1. Create feature branches from the appropriate base branch (usually `sandbox` or `test`).
