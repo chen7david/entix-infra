@@ -1,17 +1,36 @@
-name: Deploy CDK Stack
+name: Deploy Production Stack
 
 on:
   push:
     branches:
       - main
-      - staging
-      - test
+  pull_request:
+    branches:
+      - main
 
 jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
   deploy:
     runs-on: ubuntu-latest
-    # Map 'main' branch to 'production' environment, else use branch name
-    environment: ${{ github.ref_name == 'main' && 'production' || github.ref_name }}
+    needs: test
+    if: github.event_name == 'push'
+    environment: production
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -40,10 +59,6 @@ jobs:
 
       - name: Deploy CDK stack
         run: |
-          # Use 'production' prefix for main branch, else use branch name
-          if [ "${GITHUB_REF_NAME}" = "main" ]; then
-            STACK_NAME="production-entix-infra"
-          else
-            STACK_NAME="${GITHUB_REF_NAME}-entix-infra"
-          fi
-          npx cdk deploy "$STACK_NAME" --require-approval never
+          # Set environment variable for CDK app
+          export ENV="production"
+          npx cdk deploy "production-entix-infra" --require-approval never
