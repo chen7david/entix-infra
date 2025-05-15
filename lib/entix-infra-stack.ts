@@ -2,7 +2,6 @@ import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 import { createCognitoUserPool } from "./constructs/cognito-user-pool";
 import * as iam from "aws-cdk-lib/aws-iam";
-// import * as sqs from 'aws-cdk-lib/aws-sqs';
 
 /**
  * Properties for EntixInfraStack.
@@ -27,10 +26,7 @@ export class EntixInfraStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: EntixInfraStackProps) {
     super(scope, id, props);
 
-    const { userPool, userPoolClient } = createCognitoUserPool(
-      this,
-      props.envName
-    );
+    const { userPool } = createCognitoUserPool(this, props.envName);
 
     // Create IAM Policy for Cognito Admin actions
     const cognitoAdminPolicy = new iam.Policy(
@@ -65,21 +61,21 @@ export class EntixInfraStack extends cdk.Stack {
     );
 
     // Create IAM User for the environment
-    const cognitoAdminUser = new iam.User(
+    const adminUser = new iam.User(
       this,
-      `${props.envName}CognitoAdminUser`,
+      `${props.envName}EntixApiEntixApiAdminUser`,
       {
-        userName: `${props.envName}-cognito-admin-backend`,
+        userName: `${props.envName}-entix-api-admin`,
       }
     );
 
     // Attach the policy to the user
-    cognitoAdminUser.attachInlinePolicy(cognitoAdminPolicy);
+    adminUser.attachInlinePolicy(cognitoAdminPolicy);
 
     // Output the IAM user name for reference
-    new cdk.CfnOutput(this, `${props.envName}CognitoAdminUserName`, {
-      value: cognitoAdminUser.userName,
-      description: `IAM user for Cognito admin tasks in the ${props.envName} environment.`,
+    new cdk.CfnOutput(this, `${props.envName}EntixApiAdminUserName`, {
+      value: adminUser.userName,
+      description: `IAM user for entix-api admin tasks in the ${props.envName} environment.`,
     });
   }
 }
